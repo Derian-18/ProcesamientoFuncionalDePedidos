@@ -1,103 +1,99 @@
 import data.pedidos
 import data.productos
+import reportes.*
 
-fun main(){
-    // Mostrar todos los pedidos
-    pedidos.forEach {
-        println(it)
+fun main() {
+
+    println("Total vendido por categoría =====")
+    totalVendidoPorCategoria(pedidos).forEach { (categoria, total) ->
+        println("$categoria: $$total")
     }
     println()
 
-    // Mostrar todos los productos
-    productos.forEach {
-        println(it)
+    println("Total vendido por cliente =====")
+    totalVendidoPorCliente(pedidos).forEach { (cliente, total) ->
+        println("${cliente.nombre}: $$total")
     }
-
     println()
 
-    // Filtrar por estatus como entregado
-    val entregados = pedidos.filter {
-        it.estatus == "Entregado"
+    println("Cliente con mayor monto de compras =====")
+    clienteConMayorCompra(pedidos)?.let { (cliente, total) ->
+        println("${cliente.nombre} con $$total")
     }
-
-    println(entregados)
-
     println()
 
-    // Filtrar productos por categoria
-    val bebidas = productos.filter {
-        it.categoria == "Bebidas"
+    println("Producto más vendido =====")
+    productoMasVendido(pedidos)?.let { (producto, cantidad) ->
+        println("${producto.nombre} con $cantidad unidades")
     }
-
-    println(bebidas)
-
     println()
 
-    // Buscar producto por nombre
-    val producto = productos.find {
-        it.nombre.contains("café", ignoreCase = true)
+    println("Categoría con mayor venta =====")
+    categoriaConMayorVenta(pedidos)?.let { (categoria, total) ->
+        println("$categoria con $$total")
     }
-
-    println(producto)
-
     println()
 
-    //Ordeenar productos por precio
-    val ordenados = productos.sortedBy {
-        it.precio
+    println("Ticket promedio de pedidos entregados =====")
+    println("$${ticketPromedioEntregados(pedidos)}")
+    println()
+
+    println("Top 5 productos más vendidos =====")
+    topProductosMasVendidos(pedidos, 5).forEachIndexed { i, (producto, cantidad) ->
+        println("${i + 1}. ${producto.nombre} - $cantidad unidades")
     }
-
-    println(ordenados)
-
     println()
 
-    // Ordenar pedidos por monto total
-    val pedidosOrdenados = pedidos.sortedBy {
-        it.total()
+    println("Top 3 clientes con mayor compra =====")
+    topClientesMayorCompra(pedidos, 3).forEachIndexed { i, (cliente, total) ->
+        println("${i + 1}. ${cliente.nombre} - $$total")
     }
+    println()
 
-    pedidosOrdenados.forEach {
-        println("${it.id} - ${it.total()}")
+    println("Pedidos agrupados por estatus =====")
+    agruparPedidosPorEstatus(pedidos).forEach { (estatus, lista) ->
+        println("$estatus (${lista.size}): ${lista.map { it.id }}")
     }
-
     println()
 
-    // Total vendido en productos entregados
-    val totalVendido = pedidos
-        .filter { it.estatus == "Entregado" }
-        .sumOf { it.total() }
-
-    println("Total vendido: $totalVendido")
-
-    println()
-
-    // Cantidad de pedidos por estatus
-    val conteo = pedidos.groupingBy {
-        it.estatus
-    }.eachCount()
-
-    println(conteo)
-
-    println()
-
-    // Productos con precio mayor a cierta cantidad
-    val caros = productos.filter {
-        it.precio > 70
+    println("Productos agrupados por categoría =====")
+    agruparProductosPorCategoria(productos).forEach { (categoria, lista) ->
+        println("$categoria: ${lista.map { it.nombre }}")
     }
-
-    println(caros)
-
     println()
 
-    // Mostrar cliente asociado a clada pedido
-    pedidos.forEach {
-        println("Pedido ${it.id}: ${it.cliente.nombre}")
+    println("Unidades vendidas por producto =====")
+    unidadesVendidasPorProducto(pedidos).forEach { (producto, cantidad) ->
+        println("${producto.nombre}: $cantidad unidades")
     }
-
     println()
 
-    // Lista resumida
-    pedidos.map {
-        "${it.cliente.nombre} | ${it.total()} | ${it.estatus}"
-    }.forEach(::println)
+    println("Reporte general de ventas =====")
+    val reporte = reporteGeneralVentas(pedidos)
+    println("Total de pedidos: ${reporte.totalPedidos}")
+    println("Total vendido (global): $${reporte.totalVendidoGlobal}")
+    println("Producto más vendido: ${reporte.productoMasVendido?.first?.nombre}")
+    println("Categoría más vendida: ${reporte.categoriaMasVendida?.first}")
+    println("Cliente con mayor compra: ${reporte.clienteConMayorCompra?.first?.nombre}")
+    println()
+
+    println("Reporte de pedidos cancelados =====")
+    reportePedidosCancelados(pedidos).forEach {
+        println("Pedido ${it.id} - Cliente: ${it.cliente.nombre} - Total: $${it.total()}")
+    }
+    println()
+
+    println("Reporte de productos no vendidos =====")
+    reporteProductosNoVendidos(productos, pedidos).forEach {
+        println("${it.nombre} (${it.categoria})")
+    }
+    println()
+
+    println("Estadísticas generales =====")
+    val stats = estadisticasGenerales(pedidos)
+    println("Total de pedidos: ${stats.totalPedidos}")
+    println("Pedidos entregados: ${stats.pedidosEntregados}")
+    println("Pedidos cancelados: ${stats.pedidosCancelados}")
+    println("Total vendido (entregados): $${stats.totalVendido}")
+    println("Promedio de venta por pedido: $${stats.promedioVenta}")
 }
